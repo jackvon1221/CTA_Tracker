@@ -26,7 +26,7 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Our custom JavaScript will go here later -->
-    <script>
+        <script>
         // Initialize the map and set its view to Chicago's coordinates
         const map = L.map('map').setView([41.8781, -87.6298], 13);
 
@@ -34,9 +34,54 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-        // Add a marker for Clark/Lake station
+
+        // Function to fetch train data from our backend
+        async function fetchTrainData() {
+            try {
+                const response = await fetch('/api/trains');
+                const data = await response.json();
+                console.log("Train data received:", data);
+                return data;
+            } catch (error) {
+                console.error("Failed to fetch train data:", error);
+            }
+        }
+
+        // Create a marker for Clark/Lake station
         const clarkLakeStation = L.marker([41.8857, -87.6309]).addTo(map);
-        clarkLakeStation.bindPopup("<b>Clark/Lake Station</b>").openPopup();
+
+        // Function to update the popup with live train data
+        async function updatePopup() {
+            const data = await fetchTrainData();
+
+            if (!data || !data.ctatt.eta) {
+                return "<b>Clark/Lake Station</b><br>No data available.";
+            }
+
+            // Create HTML content for the popup
+            let popupContent = `<b>Clark/Lake Station</b><br><br>`;
+
+            // Add the next 3 trains to the popup content
+            data.ctatt.eta.slice(0, 3).forEach(train => {
+                // Format the arrival time
+                const arrivalTime = new Date(train.arrT).toLocaleTimeString();
+                popupContent += `➡️ ${train.destNm} - ${arrivalTime}<br>`;
+            });
+
+            return popupContent;
+        }
+
+        // Bind a popup that updates with live data when clicked
+        clarkLakeStation.bindPopup('Loading arrivals...', {maxWidth: 300});
+        clarkLakeStation.on('click', function() {
+            // When clicked, update the popup content with fresh data
+            updatePopup().then(content => {
+                clarkLakeStation.setPopupContent(content);
+            });
+        });
+
+        // Optional: Fetch data on page load for the console
+        fetchTrainData();
     </script>
 </body>
 </html>
