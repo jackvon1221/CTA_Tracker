@@ -61,11 +61,11 @@
                 'Red': '#e53935',     // CTA Red
                 'Blue': '#1976d2',    // CTA Blue
                 'Brown': '#795548',     // CTA Brown
-                'G': '#43a047',       // CTA Green
-                'Org': '#ff9800',     // CTA Orange
+                'Green': '#43a047',       // CTA Green
+                'Orange': '#ff9800',     // CTA Orange
                 'Pink': '#e91e63',    // CTA Pink
                 'Purple': '#9c27b0',  // CTA Purple
-                'Y': '#ffeb3b'        // CTA Yellow
+                'Yellow': '#ffeb3b'        // CTA Yellow
             };
             // Return the color or a default grey if not found
             return colorMap[lineName] || '#9e9e9e';
@@ -145,7 +145,59 @@
             { name: "Jefferson Park", id: 41280, coords: [41.9827, -87.9040], lines: ["Blue"] },
             { name: "Kedzie (Orange)", id: 41150, coords: [41.7982, -87.7148], lines: ["Orange"] },
             { name: "Lake (Blue)", id: 41670, coords: [41.8846, -87.6278], lines: ["Blue"] },
-            { name: "Loyola", id: 41300, coords: [42.0085, -87.6612], lines: ["Red"] }
+            { name: "Loyola", id: 41300, coords: [42.0085, -87.6612], lines: ["Red"] },
+            
+            // Additional stations to reach 70+
+            { name: "Wilson", id: 40540, coords: [41.9643, -87.6575], lines: ["Red", "Purple"] },
+            { name: "Sheridan", id: 40080, coords: [41.9538, -87.6549], lines: ["Red"] },
+            { name: "Addison (Blue)", id: 41240, coords: [41.9474, -87.6536], lines: ["Blue"] },
+            { name: "Irving Park (Blue)", id: 40550, coords: [41.9525, -87.7294], lines: ["Blue"] },
+            { name: "Montrose (Blue)", id: 41330, coords: [41.9615, -87.7436], lines: ["Blue"] },
+            { name: "Harlem (Blue)", id: 40780, coords: [41.9821, -87.8079], lines: ["Blue"] },
+            { name: "Cicero (Blue)", id: 40970, coords: [41.9745, -87.7454], lines: ["Blue"] },
+            { name: "Pulaski (Blue)", id: 40920, coords: [41.9838, -87.7254], lines: ["Blue"] },
+            { name: "Austin (Blue)", id: 40010, coords: [41.8873, -87.7768], lines: ["Blue"] },
+            { name: "Oak Park (Blue)", id: 40180, coords: [41.8720, -87.7918], lines: ["Blue"] },
+            { name: "Western (Blue)", id: 40670, coords: [41.8752, -87.7544], lines: ["Blue"] },
+            { name: "Damen (Blue)", id: 40590, coords: [41.9097, -87.6775], lines: ["Blue"] },
+            { name: "California (Blue)", id: 40440, coords: [41.9212, -87.6962], lines: ["Blue"] },
+            { name: "Western (Orange)", id: 40310, coords: [41.8045, -87.6840], lines: ["Orange"] },
+            { name: "35th/Archer", id: 40120, coords: [41.8292, -87.6806], lines: ["Orange"] },
+            { name: "Halsted (Orange)", id: 41130, coords: [41.8467, -87.6480], lines: ["Orange"] },
+            { name: "Roosevelt", id: 41400, coords: [41.8674, -87.6266], lines: ["Red", "Orange", "Green"] },
+            { name: "Cermak-McCormick Place", id: 41690, coords: [41.8531, -87.6264], lines: ["Green"] },
+            { name: "35th-Bronzeville-IIT", id: 41220, coords: [41.8310, -87.6258], lines: ["Green"] },
+            { name: "Indiana", id: 40300, coords: [41.8217, -87.6216], lines: ["Green"] },
+            { name: "43rd", id: 41270, coords: [41.8165, -87.6194], lines: ["Green"] },
+            { name: "47th (Green)", id: 41080, coords: [41.8092, -87.6188], lines: ["Green"] },
+            { name: "51st", id: 40130, coords: [41.8021, -87.6183], lines: ["Green"] },
+            { name: "Garfield (Green)", id: 40510, coords: [41.7952, -87.6182], lines: ["Green"] },
+            { name: "King Drive", id: 41140, coords: [41.7801, -87.6155], lines: ["Green"] },
+            { name: "Cottage Grove", id: 40720, coords: [41.7806, -87.6058], lines: ["Green"] },
+            { name: "Halsted (Green)", id: 40940, coords: [41.7789, -87.6445], lines: ["Green"] },
+            { name: "Ashland (Green)", id: 40170, coords: [41.8854, -87.6669], lines: ["Green", "Pink"] },
+            { name: "Morgan (Green)", id: 41510, coords: [41.8858, -87.6521], lines: ["Green", "Pink"] },
+            { name: "Clinton (Green)", id: 41160, coords: [41.8855, -87.6418], lines: ["Green", "Pink"] },
+            { name: "Central (Green)", id: 40280, coords: [41.8874, -87.7654], lines: ["Green"] },
+            { name: "Conservatory", id: 41670, coords: [41.8849, -87.7168], lines: ["Green"] },
+            { name: "Kedzie (Green)", id: 41070, coords: [41.8841, -87.7061], lines: ["Green"] },
+            { name: "California (Green)", id: 41360, coords: [41.8842, -87.6962], lines: ["Green"] },
+            { name: "Pulaski (Green)", id: 40960, coords: [41.8850, -87.7254], lines: ["Green"] },
+            { name: "Cicero (Green)", id: 40420, coords: [41.8860, -87.7446], lines: ["Green"] },
+            { name: "Austin (Green)", id: 40190, coords: [41.8870, -87.7744], lines: ["Green"] },
+            { name: "Laramie", id: 40700, coords: [41.8872, -87.7544], lines: ["Green"] },
+            { name: "Central Park", id: 40780, coords: [41.8538, -87.7148], lines: ["Pink"] },
+            { name: "Kedzie (Pink)", id: 41040, coords: [41.8539, -87.7050], lines: ["Pink"] },
+            { name: "California (Pink)", id: 40440, coords: [41.8542, -87.6943], lines: ["Pink"] },
+            { name: "Western (Pink)", id: 40740, coords: [41.8542, -87.6851], lines: ["Pink"] },
+            { name: "Damen (Pink)", id: 40210, coords: [41.8545, -87.6755], lines: ["Pink"] },
+            { name: "18th", id: 40830, coords: [41.8579, -87.6692], lines: ["Pink"] },
+            { name: "Polk", id: 41030, coords: [41.8717, -87.6695], lines: ["Pink"] },
+            { name: "Ashland (Orange)", id: 41060, coords: [41.8392, -87.6657], lines: ["Orange", "Green"] },
+            { name: "Western (Brown)", id: 41480, coords: [41.9661, -87.6885], lines: ["Brown"] },
+            { name: "Rockwell", id: 41010, coords: [41.9662, -87.6937], lines: ["Brown"] },
+            { name: "Francisco", id: 40870, coords: [41.9664, -87.7014], lines: ["Brown"] },
+            { name: "Kedzie (Brown)", id: 41180, coords: [41.9659, -87.7088], lines: ["Brown"] }
         ];
 
         // Store references to markers for search functionality
