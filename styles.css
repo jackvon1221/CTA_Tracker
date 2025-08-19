@@ -131,3 +131,8 @@ body, html {
     border-bottom: 2px solid #f0f0f0;
     padding-bottom: 10px;
 }
+.sidebar-content {
+    padding: 1.2rem;
+    max-height: calc(100vh - 80px); /* Account for header height */
+    overflow-y: auto; /* Enable scrolling */
+}

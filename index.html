@@ -32,42 +32,97 @@
     <!-- Our custom JavaScript -->
     <script>
         // Initialize the map and set its view to Chicago's coordinates
-        const map = L.map('map').setView([41.8781, -87.6298], 13);
+        const map = L.map('map').setView([41.8781, -87.6298], 11); // Zoomed out to 11 to see more stations
 
         // Add the OpenStreetMap tiles to our map
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Function to fetch train data from our backend
-        async function fetchTrainData() {
+        // Updated function to fetch train data for a specific station
+        async function fetchTrainData(stationId = '40380') {
             try {
-                const response = await fetch('/api/trains');
+                const response = await fetch(`/api/trains?stationId=${stationId}`);
                 const data = await response.json();
-                console.log("Train data received:", data);
+                console.log("Train data received for station", stationId, ":", data);
                 return data;
             } catch (error) {
                 console.error("Failed to fetch train data:", error);
             }
         }
 
-        // Create a marker for Clark/Lake station
-        const clarkLakeStation = L.marker([41.8857, -87.6309]).addTo(map);
+        // MAJOR CTA STATIONS (25 key stations)
+        const stations = [
+            // The Loop - Brown, Green, Orange, Pink, Purple
+            { name: "Clark/Lake", id: 40380, coords: [41.8857, -87.6309], lines: ["Blue", "Brown", "Green", "Orange", "Pink", "Purple"] },
+            { name: "State/Lake", id: 40260, coords: [41.8856, -87.6278], lines: ["Brown", "Green", "Orange", "Pink", "Purple"] },
+            { name: "Washington/Wabash", id: 41700, coords: [41.8834, -87.6262], lines: ["Brown", "Green", "Orange", "Pink", "Purple"] },
+            { name: "Adams/Wabash", id: 40680, coords: [41.8794, -87.6260], lines: ["Brown", "Green", "Orange", "Pink", "Purple"] },
+            { name: "Harrison", id: 41490, coords: [41.8743, -87.6275], lines: ["Brown", "Green", "Orange", "Pink", "Purple"] },
+            
+            // Red Line
+            { name: "Jackson (Red)", id: 40560, coords: [41.8782, -87.6277], lines: ["Red"] },
+            { name: "Monroe (Red)", id: 41090, coords: [41.8807, -87.6294], lines: ["Red"] },
+            { name: "Lake (Red)", id: 41660, coords: [41.8846, -87.6278], lines: ["Red"] },
+            { name: "Grand (Red)", id: 40330, coords: [41.8917, -87.6281], lines: ["Red"] },
+            { name: "Chicago (Red)", id: 41450, coords: [41.8968, -87.6281], lines: ["Red"] },
+            { name: "Howard", id: 40900, coords: [41.8704, -87.6730], lines: ["Red", "Purple", "Yellow"] },
+            { name: "95th/Dan Ryan", id: 40450, coords: [41.7226, -87.6243], lines: ["Red"] },
+            
+            // Blue Line
+            { name: "Jackson (Blue)", id: 40070, coords: [41.8782, -87.6277], lines: ["Blue"] },
+            { name: "Monroe (Blue)", id: 40790, coords: [41.8807, -87.6294], lines: ["Blue"] },
+            { name: "Washington", id: 40370, coords: [41.8834, -87.6294], lines: ["Blue"] },
+            { name: "O'Hare Airport", id: 40890, coords: [41.9827, -87.9040], lines: ["Blue"] },
+            { name: "Forest Park", id: 40390, coords: [41.8742, -87.8175], lines: ["Blue"] },
+            
+            // Brown Line
+            { name: "Belmont", id: 41320, coords: [41.9384, -87.6536], lines: ["Brown", "Purple", "Red"] },
+            { name: "Fullerton", id: 41220, coords: [41.9257, -87.6525], lines: ["Brown", "Purple", "Red"] },
+            { name: "Kimball", id: 41290, coords: [41.9672, -87.7134], lines: ["Brown"] },
+            
+            // Orange Line
+            { name: "Midway", id: 40930, coords: [41.7860, -87.7376], lines: ["Orange"] },
+            
+            // Green Line
+            { name: "Ashland/63rd", id: 40270, coords: [41.7789, -87.6638], lines: ["Green"] },
+            { name: "Harlem/Lake", id: 40020, coords: [41.8868, -87.8033], lines: ["Green"] },
+            
+            // Purple Line
+            { name: "Linden", id: 41070, coords: [42.0734, -87.6905], lines: ["Purple"] },
+            
+            // Yellow Line
+            { name: "Dempster-Skokie", id: 40140, coords: [42.0387, -87.7519], lines: ["Yellow"] }
+        ];
 
-        // Function to update the popup with live train data
-        async function updatePopup() {
-            const data = await fetchTrainData();
+        // Create a marker for each station and add it to the map
+        stations.forEach(station => {
+            const marker = L.marker(station.coords).addTo(map);
+            
+            // Bind a popup to the marker
+            marker.bindPopup('<div class="loading-text">Loading arrivals...</div>', {maxWidth: 300});
+            
+            // Create a click event for this specific marker
+            marker.on('click', function() {
+                // Fetch data for THIS specific station
+                fetchTrainData(station.id).then(data => {
+                    updatePopupForStation(marker, station.name, data);
+                    updateSidebar(data, station.name);
+                });
+            });
+        });
 
+        // Function to update popup for any station
+        function updatePopupForStation(marker, stationName, data) {
             if (!data || !data.ctatt.eta) {
-                return "<span class='station-header'>Clark/Lake Station</span><div class='loading-text'>No data available.</div>";
+                marker.setPopupContent(`<span class='station-header'>${stationName}</span><div class='loading-text'>No data available.</div>`);
+                return;
             }
 
-            // Create HTML content for the popup
-            let popupContent = `<span class="station-header">Clark/Lake Station</span>`;
+            let popupContent = `<span class="station-header">${stationName}</span>`;
 
             // Add the next 5 trains to the popup content
             data.ctatt.eta.slice(0, 5).forEach(train => {
-                // Format the arrival time to be more readable (e.g., "12:14 PM")
                 const arrivalTime = new Date(train.arrT).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 popupContent += `
                 <div class="train-line">
@@ -77,11 +132,11 @@
                 `;
             });
 
-            return popupContent;
+            marker.setPopupContent(popupContent);
         }
 
         // Function to update the SIDEBAR with live train data
-        function updateSidebar(data) {
+        function updateSidebar(data, stationName) {
             const sidebarContent = document.querySelector('.sidebar-content');
 
             if (!data || !data.ctatt.eta) {
@@ -90,7 +145,7 @@
             }
 
             // Create HTML content for the sidebar
-            let sidebarHTML = `<h3>Clark/Lake Station</h3>`;
+            let sidebarHTML = `<h3>${stationName}</h3>`;
 
             // Add ALL trains to the sidebar content
             data.ctatt.eta.forEach(train => {
@@ -105,40 +160,6 @@
 
             sidebarContent.innerHTML = sidebarHTML;
         }
-
-        // Bind a popup that updates with live data when clicked
-        clarkLakeStation.bindPopup('<div class="loading-text">Loading arrivals...</div>', {maxWidth: 300});
-        clarkLakeStation.on('click', function() {
-            // When clicked, update the popup content with fresh data
-            updatePopup().then(content => {
-                clarkLakeStation.setPopupContent(content);
-            });
-            // ALSO update the sidebar with fresh data
-            fetchTrainData().then(data => {
-                updateSidebar(data);
-            });
-        });
-
-        // Fetch data on page load for the console
-        fetchTrainData();
-
-        // Function to start auto-refreshing data
-        function startAutoRefresh() {
-            setInterval(() => {
-                console.log("Auto-refreshing data...");
-                // If the popup is open, update it with fresh data
-                if (clarkLakeStation.isPopupOpen()) {
-                    updatePopup().then(content => {
-                        clarkLakeStation.setPopupContent(content);
-                    });
-                }
-                // Re-fetch for the console too
-                fetchTrainData();
-            }, 30000); // 30000 milliseconds = 30 seconds
-        }
-
-        // Start the auto-refresh
-        startAutoRefresh();
 
         // Sidebar Toggle Functionality
         const sidebar = document.getElementById('sidebar');

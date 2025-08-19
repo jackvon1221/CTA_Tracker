@@ -5,35 +5,38 @@ require('dotenv').config(); // Loads variables from .env file
 const app = express();
 const port = process.env.PORT || 3000; // Use the environment port or 3000
 
-// server.js - Add this line
-app.use(express.static('.')); // Serve static files from the current directory
-// server.js - Updated /api/trains route
+// Serve static files from the current directory
+app.use(express.static('.'));
+
+// Dynamic API endpoint - accepts stationId parameter
 app.get('/api/trains', async (req, res) => {
-  // 1. Construct the URL for the CTA Train Tracker API
-  // The 'stpid' parameter is for a station ID. We're using the default for Clark/Lake (40380) for now.
-  const url = `https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx?key=${process.env.CTA_TRAIN_API_KEY}&mapid=40380&outputType=JSON`;
+  // Get the stationId from the query parameter, default to Clark/Lake if not provided
+  const stationId = req.query.stationId || '40380';
+  
+  // Construct the URL for the CTA API using the dynamic stationId
+  const url = `https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx?key=${process.env.CTA_TRAIN_API_KEY}&mapid=${stationId}&outputType=JSON`;
 
   try {
-    console.log("Fetching data from CTA API..."); // Helpful log for debugging
+    console.log(`Fetching data for station ID: ${stationId}...`);
 
-    // 2. Fetch data from the CTA API
+    // Fetch data from the CTA API
     const response = await fetch(url);
 
-    // 3. Check if the HTTP response is OK (status code 200-299)
+    // Check if the HTTP response is OK (status code 200-299)
     if (!response.ok) {
       throw new Error(`CTA API error! status: ${response.status}`);
     }
 
-    // 4. Parse the JSON response from the API
+    // Parse the JSON response from the API
     const data = await response.json();
 
-    // 5. Send the train data back to the frontend
+    // Send the train data back to the frontend
     res.json(data);
 
-    console.log("Data sent to client successfully!"); // Helpful log
+    console.log(`Data for station ${stationId} sent successfully!`);
 
   } catch (error) {
-    // 6. If anything fails above, send a 500 error and the message
+    // If anything fails above, send a 500 error and the message
     console.error("Fetch failed:", error);
     res.status(500).json({ error: error.message });
   }
