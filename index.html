@@ -10,9 +10,23 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Search bar (always visible) -->
+    <!-- Search bar with filter (always visible) -->
     <div class="top-search-container">
-        <input type="text" id="top-station-search" placeholder="Search for a station...">
+        <div class="search-controls">
+            <input type="text" id="top-station-search" placeholder="Search for a station...">
+            <select id="line-filter">
+                <option value="all">All Lines</option>
+                <option value="Red">Red Line</option>
+                <option value="Blue">Blue Line</option>
+                <option value="Brn">Brown Line</option>
+                <option value="G">Green Line</option>
+                <option value="Org">Orange Line</option>
+                <option value="Pink">Pink Line</option>
+                <option value="Purple">Purple Line</option>
+                <option value="Y">Yellow Line</option>
+                <option value="bus">Bus Stops</option> <!-- Placeholder for future -->
+            </select>
+        </div>
         <div id="top-search-results"></div>
     </div>
 
@@ -223,24 +237,41 @@
             sidebar.classList.remove('active');
         });
 
-        // Search functionality
+        // Search functionality with filtering
         const stationSearch = document.getElementById('top-station-search');
+        const lineFilter = document.getElementById('line-filter');
         const searchResults = document.getElementById('top-search-results');
 
-        stationSearch.addEventListener('input', function() {
-            const query = this.value.toLowerCase().trim();
+        stationSearch.addEventListener('input', performSearch);
+        lineFilter.addEventListener('change', performSearch);
+
+        function performSearch() {
+            const query = stationSearch.value.toLowerCase().trim();
+            const selectedLine = lineFilter.value;
             
-            if (query.length < 2) {
+            if (query.length < 2 && selectedLine === 'all') {
                 searchResults.style.display = 'none';
                 return;
             }
             
-            const results = stations.filter(station => 
-                station.name.toLowerCase().includes(query)
-            );
+            let results = stations;
+            
+            // Apply line filter
+            if (selectedLine !== 'all') {
+                results = results.filter(station => 
+                    station.lines.includes(selectedLine)
+                );
+            }
+            
+            // Apply search query filter
+            if (query.length >= 2) {
+                results = results.filter(station => 
+                    station.name.toLowerCase().includes(query)
+                );
+            }
             
             displaySearchResults(results);
-        });
+        }
 
         function displaySearchResults(results) {
             searchResults.innerHTML = '';

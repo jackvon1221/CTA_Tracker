@@ -12,17 +12,41 @@ body, html {
     width: 100%;
 }
 
-/* Top search container */
+/* Top search container - MOVED TO RIGHT */
 .top-search-container {
     position: fixed;
     top: 15px;
-    left: 15px;
+    right: 60px; /* Position left of the menu button */
     z-index: 999;
     width: 300px;
     background: white;
     border-radius: 4px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     padding: 10px;
+}
+
+.search-controls {
+    display: flex;
+    gap: 8px;
+}
+
+#top-station-search {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+#line-filter {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    min-width: 100px;
 }
 
 #top-station-search {
