@@ -12,6 +12,41 @@ body, html {
     width: 100%;
 }
 
+/* Top search container */
+.top-search-container {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 999;
+    width: 300px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    padding: 10px;
+}
+
+#top-station-search {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+#top-search-results {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-top: 5px;
+    display: none;
+    position: absolute;
+    width: calc(100% - 20px);
+    background: white;
+    z-index: 1000;
+}
+
 /* Modern, accessible popup styling */
 .leaflet-popup-content-wrapper {
     border-radius: 12px;
@@ -90,24 +125,15 @@ body, html {
     transform: translateX(0); /* slide in from right when active */
 }
 
-.sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.2rem;
-    border-bottom: 1px solid #eaeaea;
-    background-color: #0057a3;
-    color: white;
-}
-
-.sidebar-header h2 {
-    margin: 0;
-    font-size: 1.4rem;
-    font-weight: 600;
-}
-
 .sidebar-content {
     padding: 1.2rem;
+}
+
+.sidebar-content h3 {
+    color: #0057a3;
+    margin-top: 0;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
 }
 
 /* --- Menu Toggle Button --- */
@@ -125,14 +151,42 @@ body, html {
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
-.sidebar-content h3 {
-    color: #0057a3;
-    margin-top: 0;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 10px;
+
+/* Search result items */
+.search-result-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f5f5f5;
 }
-.sidebar-content {
-    padding: 1.2rem;
-    max-height: calc(100vh - 80px); /* Account for header height */
-    overflow-y: auto; /* Enable scrolling */
+
+.search-result-item:hover {
+    background-color: #f0f7ff;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+/* Custom marker styling */
+.custom-line-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .top-search-container {
+        width: calc(100% - 60px);
+        left: 10px;
+        top: 10px;
+    }
+    
+    #sidebar {
+        width: 280px;
+    }
+    
+    .menu-toggle-button {
+        top: 10px;
+        right: 10px;
+    }
 }
