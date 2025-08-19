@@ -82,6 +82,23 @@
 
         // Optional: Fetch data on page load for the console
         fetchTrainData();
+        // Function to start auto-refreshing data
+        function startAutoRefresh() {
+            setInterval(() => {
+                console.log("Auto-refreshing data...");
+                // If the popup is open, update it with fresh data
+                if (clarkLakeStation.isPopupOpen()) {
+                    updatePopup().then(content => {
+                        clarkLakeStation.setPopupContent(content);
+                    });
+                }
+                // Optional: Re-fetch for the console too
+                fetchTrainData();
+            }, 30000); // 30000 milliseconds = 30 seconds
+        }
+
+        // Start the auto-refresh
+        startAutoRefresh();
     </script>
 </body>
 </html>
