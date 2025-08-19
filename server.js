@@ -5,6 +5,8 @@ require('dotenv').config(); // Loads variables from .env file
 const app = express();
 const port = process.env.PORT || 3000; // Use the environment port or 3000
 
+// server.js - Add this line
+app.use(express.static('.')); // Serve static files from the current directory
 // server.js - Updated /api/trains route
 app.get('/api/trains', async (req, res) => {
   // 1. Construct the URL for the CTA Train Tracker API

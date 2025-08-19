@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTA Train Tracker</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Our custom CSS will go here later -->
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- This is where the map will be displayed -->
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Our custom JavaScript will go here later -->
+    <script>
+        // Initialize the map and set its view to Chicago's coordinates
+        const map = L.map('map').setView([41.8781, -87.6298], 13);
+
+        // Add the OpenStreetMap tiles to our map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        // Add a marker for Clark/Lake station
+        const clarkLakeStation = L.marker([41.8857, -87.6309]).addTo(map);
+        clarkLakeStation.bindPopup("<b>Clark/Lake Station</b>").openPopup();
+    </script>
+</body>
+</html>
