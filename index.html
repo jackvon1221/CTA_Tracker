@@ -6,6 +6,8 @@
     <title>CTA Train Tracker</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- Our custom CSS -->
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -39,6 +41,11 @@
 
     <!-- Button to toggle sidebar (always visible) -->
     <button id="menu-toggle" class="menu-toggle-button">&equiv;</button>
+    
+    <!-- NEW: Button to get user location -->
+    <button id="locate-user" class="locate-button" title="Find my location">
+        <i class="fas fa-location-arrow"></i>
+    </button>
 
     <!-- This is where the map will be displayed -->
     <div id="map"></div>
@@ -203,6 +210,10 @@
         // Store references to markers for search functionality
         const stationMarkers = {};
 
+        // NEW: Store user location marker
+        let userLocationMarker = null;
+        let userLocation = null;
+
         // Create a marker for each station and add it to the map
         stations.forEach(station => {
             // Use the first line in the station's lines array for color
@@ -276,6 +287,143 @@
             sidebarContent.innerHTML = sidebarHTML;
         }
 
+        // NEW: Function to calculate distance between two coordinates (in miles)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 3958.8; // Earth radius in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // NEW: Function to find nearest stations
+        function findNearestStations(userLat, userLon, count = 5) {
+            // Calculate distance to each station
+            const stationsWithDistance = stations.map(station => {
+                const distance = calculateDistance(
+                    userLat, userLon, 
+                    station.coords[0], station.coords[1]
+                );
+                return { ...station, distance };
+            });
+            
+            // Sort by distance and return top N
+            return stationsWithDistance
+                .sort((a, b) => a.distance - b.distance)
+                .slice(0, count);
+        }
+
+        // NEW: Function to display nearest stations in sidebar
+        function displayNearestStations(nearestStations) {
+            const sidebarContent = document.querySelector('.sidebar-content');
+            
+            let html = `
+                <h3>Your Location</h3>
+                <p>Nearest CTA stations:</p>
+                <div class="nearest-stations">
+            `;
+            
+            nearestStations.forEach(station => {
+                html += `
+                    <div class="nearest-station-item" data-station-id="${station.id}">
+                        <span>${station.name}</span>
+                        <span class="distance-badge">${station.distance.toFixed(1)} mi</span>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            sidebarContent.innerHTML = html;
+            
+            // Add click events to station items
+            document.querySelectorAll('.nearest-station-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const stationId = this.getAttribute('data-station-id');
+                    const station = stations.find(s => s.id == stationId);
+                    
+                    if (station && stationMarkers[stationId]) {
+                        map.setView(station.coords, 16);
+                        stationMarkers[stationId].openPopup();
+                        
+                        // Fetch data for this station
+                        fetchTrainData(stationId).then(data => {
+                            updatePopupForStation(stationMarkers[stationId], station.name, data);
+                            updateSidebar(data, station.name);
+                        });
+                    }
+                });
+            });
+        }
+
+        // NEW: Function to handle user location
+        function locateUser() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser");
+                return;
+            }
+            
+            // Show loading state
+            const locateButton = document.getElementById('locate-user');
+            locateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            navigator.geolocation.getCurrentPosition(
+                // Success callback
+                function(position) {
+                    // Restore button icon
+                    locateButton.innerHTML = '<i class="fas fa-location-arrow"></i>';
+                    
+                    const userLat = position.coords.latitude;
+                    const userLon = position.coords.longitude;
+                    userLocation = [userLat, userLon];
+                    
+                    // Remove existing user marker if any
+                    if (userLocationMarker) {
+                        map.removeLayer(userLocationMarker);
+                    }
+                    
+                    // Create user location marker
+                    userLocationMarker = L.marker([userLat, userLon], {
+                        icon: L.divIcon({
+                            className: 'user-location-marker',
+                            iconSize: [22, 22],
+                            iconAnchor: [11, 11]
+                        })
+                    }).addTo(map);
+                    
+                    // Add popup to user location
+                    userLocationMarker.bindPopup("Your location").openPopup();
+                    
+                    // Center map on user location
+                    map.setView([userLat, userLon], 14);
+                    
+                    // Find and display nearest stations
+                    const nearestStations = findNearestStations(userLat, userLon, 5);
+                    displayNearestStations(nearestStations);
+                    
+                    // Open sidebar
+                    sidebar.classList.add('active');
+                },
+                // Error callback
+                function(error) {
+                    // Restore button icon
+                    locateButton.innerHTML = '<i class="fas fa-location-arrow"></i>';
+                    
+                    console.error("Geolocation error:", error);
+                    alert("Unable to retrieve your location. Please check your browser permissions.");
+                },
+                // Options
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        }
+
         // Sidebar Toggle Functionality
         const sidebar = document.getElementById('sidebar');
         const menuToggle = document.getElementById('menu-toggle');
@@ -288,6 +436,9 @@
         map.on('click', () => {
             sidebar.classList.remove('active');
         });
+
+        // NEW: Add event listener for location button
+        document.getElementById('locate-user').addEventListener('click', locateUser);
 
         // Search functionality with filtering
         const stationSearch = document.getElementById('top-station-search');
