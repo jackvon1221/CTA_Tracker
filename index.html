@@ -80,12 +80,42 @@
             return popupContent;
         }
 
+        // Function to update the SIDEBAR with live train data
+        function updateSidebar(data) {
+            const sidebarContent = document.querySelector('.sidebar-content');
+
+            if (!data || !data.ctatt.eta) {
+                sidebarContent.innerHTML = `<p>No data available for this station.</p>`;
+                return;
+            }
+
+            // Create HTML content for the sidebar
+            let sidebarHTML = `<h3>Clark/Lake Station</h3>`;
+
+            // Add ALL trains to the sidebar content
+            data.ctatt.eta.forEach(train => {
+                const arrivalTime = new Date(train.arrT).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                sidebarHTML += `
+                <div class="train-line">
+                    <span class="destination">${train.destNm}</span>
+                    <span class="arrival-time">${arrivalTime}</span>
+                </div>
+                `;
+            });
+
+            sidebarContent.innerHTML = sidebarHTML;
+        }
+
         // Bind a popup that updates with live data when clicked
         clarkLakeStation.bindPopup('<div class="loading-text">Loading arrivals...</div>', {maxWidth: 300});
         clarkLakeStation.on('click', function() {
             // When clicked, update the popup content with fresh data
             updatePopup().then(content => {
                 clarkLakeStation.setPopupContent(content);
+            });
+            // ALSO update the sidebar with fresh data
+            fetchTrainData().then(data => {
+                updateSidebar(data);
             });
         });
 
