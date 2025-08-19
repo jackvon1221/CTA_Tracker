@@ -6,27 +6,31 @@
     <title>CTA Train Tracker</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Our custom CSS will go here later -->
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-    </style>
+    <!-- Our custom CSS -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h2>CTA Tracker</h2>
+        </div>
+        <div class="sidebar-content">
+            <p>Select a station on the map to see arrivals.</p>
+            <!-- Search and station list will go here later -->
+        </div>
+    </div>
+
+    <!-- Button to toggle sidebar (always visible) -->
+    <button id="menu-toggle" class="menu-toggle-button">&equiv;</button>
+
     <!-- This is where the map will be displayed -->
     <div id="map"></div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Our custom JavaScript will go here later -->
-        <script>
+    <!-- Our custom JavaScript -->
+    <script>
         // Initialize the map and set its view to Chicago's coordinates
         const map = L.map('map').setView([41.8781, -87.6298], 13);
 
@@ -55,24 +59,29 @@
             const data = await fetchTrainData();
 
             if (!data || !data.ctatt.eta) {
-                return "<b>Clark/Lake Station</b><br>No data available.";
+                return "<span class='station-header'>Clark/Lake Station</span><div class='loading-text'>No data available.</div>";
             }
 
             // Create HTML content for the popup
-            let popupContent = `<b>Clark/Lake Station</b><br><br>`;
+            let popupContent = `<span class="station-header">Clark/Lake Station</span>`;
 
-            // Add the next 3 trains to the popup content
-            data.ctatt.eta.slice(0, 3).forEach(train => {
-                // Format the arrival time
-                const arrivalTime = new Date(train.arrT).toLocaleTimeString();
-                popupContent += `➡️ ${train.destNm} - ${arrivalTime}<br>`;
+            // Add the next 5 trains to the popup content
+            data.ctatt.eta.slice(0, 5).forEach(train => {
+                // Format the arrival time to be more readable (e.g., "12:14 PM")
+                const arrivalTime = new Date(train.arrT).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                popupContent += `
+                <div class="train-line">
+                    <span class="destination">${train.destNm}</span>
+                    <span class="arrival-time">${arrivalTime}</span>
+                </div>
+                `;
             });
 
             return popupContent;
         }
 
         // Bind a popup that updates with live data when clicked
-        clarkLakeStation.bindPopup('Loading arrivals...', {maxWidth: 300});
+        clarkLakeStation.bindPopup('<div class="loading-text">Loading arrivals...</div>', {maxWidth: 300});
         clarkLakeStation.on('click', function() {
             // When clicked, update the popup content with fresh data
             updatePopup().then(content => {
@@ -80,8 +89,9 @@
             });
         });
 
-        // Optional: Fetch data on page load for the console
+        // Fetch data on page load for the console
         fetchTrainData();
+
         // Function to start auto-refreshing data
         function startAutoRefresh() {
             setInterval(() => {
@@ -92,13 +102,26 @@
                         clarkLakeStation.setPopupContent(content);
                     });
                 }
-                // Optional: Re-fetch for the console too
+                // Re-fetch for the console too
                 fetchTrainData();
             }, 30000); // 30000 milliseconds = 30 seconds
         }
 
         // Start the auto-refresh
         startAutoRefresh();
+
+        // Sidebar Toggle Functionality
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking on the map
+        map.on('click', () => {
+            sidebar.classList.remove('active');
+        });
     </script>
 </body>
 </html>
