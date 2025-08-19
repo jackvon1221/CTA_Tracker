@@ -1,17 +1,18 @@
 {
   "name": "cta_tracker",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Chicago CTA Train Tracker",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jackvon1221/CTA_Tracker.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["CTA", "chicago", "transit"],
+  "author": "Your Name",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/jackvon1221/CTA_Tracker/issues"
@@ -20,5 +21,8 @@
   "dependencies": {
     "dotenv": "^17.2.1",
     "express": "^5.1.0"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
