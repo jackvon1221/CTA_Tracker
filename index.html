@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CTA Train Tracker</title>
+    <title>CTA Train Tracker with AI Assistant</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Font Awesome for icons -->
@@ -42,9 +42,34 @@
     <!-- Button to toggle sidebar (always visible) -->
     <button id="menu-toggle" class="menu-toggle-button">&equiv;</button>
     
-    <!-- NEW: Button to get user location -->
+    <!-- Button to get user location -->
     <button id="locate-user" class="locate-button" title="Find my location">
         <i class="fas fa-location-arrow"></i>
+    </button>
+    
+    <!-- AI Chatbot -->
+    <div class="chatbot-container" id="chatbot">
+        <div class="chatbot-header">
+            <div class="chatbot-title">CTA Route Assistant</div>
+            <button class="chatbot-close" id="chatbot-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chatbot-messages" id="chatbot-messages">
+            <div class="message bot">
+                Hi there! I can help you find the best CTA route. Where would you like to go?
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbot-input" placeholder="Type your message...">
+            <button id="chatbot-send">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+    
+    <button class="chatbot-toggle" id="chatbot-toggle">
+        <i class="fas fa-robot"></i>
     </button>
 
     <!-- This is where the map will be displayed -->
@@ -107,6 +132,7 @@
                 console.error("Failed to fetch train data:", error);
             }
         }
+
 
         // MAJOR CTA STATIONS (45 stations)
         const stations = [
@@ -210,7 +236,7 @@
         // Store references to markers for search functionality
         const stationMarkers = {};
 
-        // NEW: Store user location marker
+        // Store user location marker
         let userLocationMarker = null;
         let userLocation = null;
 
@@ -287,7 +313,7 @@
             sidebarContent.innerHTML = sidebarHTML;
         }
 
-        // NEW: Function to calculate distance between two coordinates (in miles)
+        // Function to calculate distance between two coordinates (in miles)
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 3958.8; // Earth radius in miles
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -300,7 +326,7 @@
             return R * c;
         }
 
-        // NEW: Function to find nearest stations
+        // Function to find nearest stations
         function findNearestStations(userLat, userLon, count = 5) {
             // Calculate distance to each station
             const stationsWithDistance = stations.map(station => {
@@ -317,7 +343,7 @@
                 .slice(0, count);
         }
 
-        // NEW: Function to display nearest stations in sidebar
+        // Function to display nearest stations in sidebar
         function displayNearestStations(nearestStations) {
             const sidebarContent = document.querySelector('.sidebar-content');
             
@@ -359,7 +385,7 @@
             });
         }
 
-        // NEW: Function to handle user location
+        // Function to handle user location
         function locateUser() {
             if (!navigator.geolocation) {
                 alert("Geolocation is not supported by your browser");
@@ -424,6 +450,119 @@
             );
         }
 
+        // Chatbot functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatbot = document.getElementById('chatbot');
+            const chatbotToggle = document.getElementById('chatbot-toggle');
+            const chatbotClose = document.getElementById('chatbot-close');
+            const chatbotMessages = document.getElementById('chatbot-messages');
+            const chatbotInput = document.getElementById('chatbot-input');
+            const chatbotSend = document.getElementById('chatbot-send');
+            
+            // Toggle chatbot visibility
+            chatbotToggle.addEventListener('click', () => {
+                chatbot.classList.toggle('active');
+            });
+            
+            chatbotClose.addEventListener('click', () => {
+                chatbot.classList.remove('active');
+            });
+            
+            // Send message function
+            function sendMessage() {
+                const message = chatbotInput.value.trim();
+                if (message) {
+                    addMessage(message, 'user');
+                    chatbotInput.value = '';
+                    
+                    // Process the message and generate a response
+                    setTimeout(() => {
+                        const response = generateResponse(message);
+                        addMessage(response, 'bot');
+                    }, 500);
+                }
+            }
+            
+            // Send message on button click or Enter key
+            chatbotSend.addEventListener('click', sendMessage);
+            chatbotInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Add message to chat
+            function addMessage(text, sender) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', sender);
+                
+                // Check if the response contains route information
+                if (sender === 'bot' && text.includes('Step 1:')) {
+                    messageElement.innerHTML = formatRouteResponse(text);
+                } else {
+                    messageElement.textContent = text;
+                }
+                
+                chatbotMessages.appendChild(messageElement);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            }
+            
+            // Format route response with better styling
+            function formatRouteResponse(text) {
+                // Simple formatting for demonstration
+                return text.replace(/(Step \d+:)/g, '<strong>$1</strong>')
+                          .replace(/(Red Line|Blue Line|Green Line|Brown Line|Orange Line|Purple Line|Pink Line|Yellow Line)/g, 
+                                  '<span style="color: #0057a3; font-weight: 600;">$1</span>');
+            }
+            
+            // Simple AI response generator
+            function generateResponse(message) {
+                const lowerMsg = message.toLowerCase();
+                
+                // Greetings
+                if (lowerMsg.includes('hi') || lowerMsg.includes('hello') || lowerMsg.includes('hey')) {
+                    return "Hello! I can help you find the best CTA route. Where would you like to go?";
+                }
+                
+                // Help command
+                if (lowerMsg.includes('help')) {
+                    return "I can help you find transit routes in Chicago. Try asking something like: 'How do I get to the Art Institute?' or 'What's the best way to Wrigley Field?'";
+                }
+                
+                // Route planning - these are simplified examples
+                if (lowerMsg.includes('airport') || lowerMsg.includes('o\'hare') || lowerMsg.includes('ord')) {
+                    return "To get to O'Hare Airport:\n\nStep 1: Take the Blue Line towards O'Hare\nStep 2: Ride it to the end of the line at O'Hare Station\nStep 3: Follow signs to your terminal\n\nTravel time: Approximately 45 minutes from downtown.";
+                }
+                
+                if (lowerMsg.includes('downtown') || lowerMsg.includes('loop') || lowerMsg.includes('millennium')) {
+                    return "To get to Downtown Chicago:\n\nStep 1: Take any train line heading toward the Loop\nStep 2: Get off at State/Lake, Clark/Lake, or Washington/Wabash stations\nStep 3: Most attractions are within walking distance\n\nTip: The Loop is served by all train lines except Yellow.";
+                }
+                
+                if (lowerMsg.includes('wrigley') || lowerMsg.includes('cubs') || lowerMsg.includes('addison')) {
+                    return "To get to Wrigley Field:\n\nStep 1: Take the Red Line to Addison station\nStep 2: Walk east on Addison Street for 5 minutes\nStep 3: You'll see the iconic marquee!\n\nTravel time: About 20 minutes from downtown.";
+                }
+                
+                if (lowerMsg.includes('sox') || lowerMsg.includes('guaranteed rate') || lowerMsg.includes('35th')) {
+                    return "To get to Guaranteed Rate Field (White Sox):\n\nStep 1: Take the Red Line to Sox-35th station\nStep 2: The ballpark is right next to the station\n\nTravel time: About 15 minutes from downtown.";
+                }
+                
+                if (lowerMsg.includes('navy pier') || lowerMsg.includes('navy')) {
+                    return "To get to Navy Pier:\n\nOption 1: Take any train to Washington/Wabash and walk east (15 min walk)\nOption 2: Take the #29 bus from State Street\nOption 3: In summer, take the free trolley from Michigan Avenue\n\nTip: The walk from the station is pleasant through downtown!";
+                }
+                
+                if (lowerMsg.includes('museum') || lowerMsg.includes('field') || lowerMsg.includes('shedd')) {
+                    return "To get to Museum Campus (Field, Shedd, Adler):\n\nStep 1: Take the Red, Orange, or Green Line to Roosevelt\nStep 2: Walk east through the park (15-20 min walk)\nStep 3: Alternatively, transfer to the #146 bus heading east\n\nTip: The walk through Grant Park is beautiful on a nice day!";
+                }
+                
+                if (lowerMsg.includes('how') && lowerMsg.includes('get')) {
+                    return "I can help with that! Please specify where you're starting from and where you want to go. For example: 'How do I get from the loop to Wrigley Field?'";
+                }
+                
+                // Default response
+                return "I'm not sure I understand. I can help you find transit routes in Chicago. Try asking about a specific destination like 'How do I get to the airport?' or 'What's the best way to Navy Pier?'";
+            }
+        });
+
         // Sidebar Toggle Functionality
         const sidebar = document.getElementById('sidebar');
         const menuToggle = document.getElementById('menu-toggle');
@@ -437,7 +576,7 @@
             sidebar.classList.remove('active');
         });
 
-        // NEW: Add event listener for location button
+        // Add event listener for location button
         document.getElementById('locate-user').addEventListener('click', locateUser);
 
         // Search functionality with filtering
