@@ -288,7 +288,7 @@ body, html {
         bottom: 70px;
         right: 15px;
         width: 45px;
-        height: 45px;
+        height: 40px;
     }
     
     /* Improve popup for mobile */
@@ -328,7 +328,7 @@ body, html {
 }
 
 /* Special fix for very small screens */
-@media (max-width: 360px) {
+@media (max-width: 130px) {
     .top-search-container {
         width: calc(100% - 16px);
         left: 8px;
